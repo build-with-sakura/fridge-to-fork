@@ -27,6 +27,7 @@ export const INGREDIENTS = [
   { key: 'vinegar', label: 'Vinegar', group: 'Pantry' },
   { key: 'miso', label: 'Miso', group: 'Pantry' },
   { key: 'curry roux', label: 'Curry roux', group: 'Pantry' },
+  { key: 'dashi', label: 'Dashi', group: 'Pantry' },
   { key: 'butter', label: 'Butter', group: 'Pantry' },
   { key: 'cheese', label: 'Cheese', group: 'Pantry' },
   { key: 'milk', label: 'Milk', group: 'Pantry' }

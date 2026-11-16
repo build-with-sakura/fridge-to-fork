@@ -36,7 +36,7 @@ function subsets(list) {
 /* ---------- 1. Recipe data ---------- */
 const BASICS = ['water', 'salt', 'pepper', 'sugar', 'oil'];
 const TAPPABLE = new Set(INGREDIENTS.map((i) => i.key));
-const NOT_TAPPABLE_BUT_NEEDED = ['dashi']; /* known limitation: must be typed in */
+const NOT_TAPPABLE_BUT_NEEDED = []; /* every needed ingredient must be tappable */
 test('there are exactly 10 recipes', () => assert.equal(RECIPES.length, 10));
 for (const r of RECIPES) {
   test(r.id + ': has at least one essential ingredient', () => assert.ok(keysOf(r, 'essential').length >= 1));
@@ -68,7 +68,19 @@ for (const r of RECIPES) {
   });
 }
 test('every recipe id is unique', () => assert.equal(new Set(RECIPES.map((r) => r.id)).size, 10));
-test('all 29 fridge ingredients are still there', () => assert.equal(INGREDIENTS.length, 29));
+test('the 29 original fridge ingredients are still there, plus Dashi', () => {
+  assert.equal(INGREDIENTS.length, 30);
+  const original = ['eggs', 'chicken', 'pork', 'beef', 'fish', 'shrimp', 'tofu', 'rice', 'noodles', 'bread', 'potatoes', 'carrots', 'cabbage', 'onions', 'garlic', 'tomatoes', 'ginger', 'green onions', 'eggplant', 'bell pepper', 'mushrooms', 'spinach', 'soy sauce', 'vinegar', 'miso', 'curry roux', 'butter', 'cheese', 'milk'];
+  for (const k of original) assert.ok(TAPPABLE.has(k), k);
+  assert.equal(INGREDIENTS.find((i) => i.key === 'dashi').group, 'Pantry');
+});
+test('the Dashi chip satisfies the dashi requirement in Tofu Miso Soup', () => {
+  assert.equal(knownIngredient('Dashi').key, 'dashi');
+  assert.equal(labelFor('dashi'), 'Dashi');
+  assert.equal(status('miso-soup', ['miso', 'tofu', 'dashi']), 'now');
+  assert.equal(status('miso-soup', ['miso', 'tofu']), 'almost');
+  assert.equal(matchRecipe(by('oyakodon'), ['dashi']).optional.find((o) => o.item.key === 'dashi').have, true);
+});
 
 /* ---------- 2. Matching: every recipe, every combination ---------- */
 for (const r of RECIPES) {

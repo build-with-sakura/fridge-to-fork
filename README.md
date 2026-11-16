@@ -125,7 +125,6 @@ Things to know:
 - The app knows which ingredients you have. It does not know how much you have.
 - Kitchen basics are assumed, not checked. Each recipe lists the amounts.
 - "Rice" means you have rice. Recipes that need cooked rice say so.
-- Dashi is not a tappable item. Type "dashi" in the search box to add it.
 
 ## Other names for ingredients
 
