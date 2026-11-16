@@ -96,7 +96,8 @@ Only use photos you own or have a licence for.
 
 ## Add or edit a recipe
 
-Open `src/data/recipes.js`. Copy one recipe and change it.
+The original ten recipes are in `src/data/recipes.js`. Newer recipes are in `src/data/recipes-more.js`.
+Open `recipes-more.js`. Copy one recipe and change it.
 
 - `key` is the plain ingredient name used for matching.
 - `role` is `essential`, `required` or `optional`. See "How matching works" below.
@@ -145,4 +146,5 @@ The same tests run on GitHub before each build.
 
 - TheMealDB connection. A converter is ready in `src/data/mealdb.js`, but nothing uses it.
 - Real recipe photos.
-- The 10 recipes are samples. Please check them before sharing the app widely.
+- The 30 recipes are samples. Please check them before sharing the app widely.
+- Photos for the 20 newer recipes. They show a drawn plate until photos are added.

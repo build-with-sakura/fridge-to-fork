@@ -40,8 +40,8 @@ function subsets(list) {
 const BASICS = ['water', 'salt', 'pepper', 'sugar', 'oil'];
 const TAPPABLE = new Set(INGREDIENTS.map((i) => i.key));
 const NOT_TAPPABLE_BUT_NEEDED = []; /* every needed ingredient must be tappable */
-const EXPECTED_RECIPES = 20;
-const EXPECTED_INGREDIENTS = 36;
+const EXPECTED_RECIPES = 30;
+const EXPECTED_INGREDIENTS = 37;
 const ORIGINAL_IDS = ['chicken-adobo', 'tortang-talong', 'ginisang-repolyo', 'sinangag', 'oyakodon', 'japanese-curry', 'miso-soup', 'gyudon', 'tomato-egg', 'spanish-omelette'];
 test('the library has ' + EXPECTED_RECIPES + ' recipes', () => assert.equal(RECIPES.length, EXPECTED_RECIPES));
 test('the original ten recipes come first, in the same order', () => assert.deepEqual(RECIPES.slice(0, 10).map((r) => r.id), ORIGINAL_IDS));
@@ -94,7 +94,7 @@ test('all earlier fridge ingredients are still there, plus the new ones', () => 
   assert.equal(INGREDIENTS.length, EXPECTED_INGREDIENTS);
   assert.equal(new Set(INGREDIENTS.map((i) => i.key)).size, INGREDIENTS.length);
   for (const i of INGREDIENTS) assert.ok(['Protein', 'Veggies', 'Grains', 'Pantry'].includes(i.group), i.key);
-  for (const k of ['dashi', 'tomato sauce', 'sinigang mix', 'lemon', 'mirin', 'oyster sauce', 'patis']) assert.ok(TAPPABLE.has(k), k);
+  for (const k of ['dashi', 'tomato sauce', 'sinigang mix', 'lemon', 'mirin', 'oyster sauce', 'patis', 'pasta']) assert.ok(TAPPABLE.has(k), k);
   const original = ['eggs', 'chicken', 'pork', 'beef', 'fish', 'shrimp', 'tofu', 'rice', 'noodles', 'bread', 'potatoes', 'carrots', 'cabbage', 'onions', 'garlic', 'tomatoes', 'ginger', 'green onions', 'eggplant', 'bell pepper', 'mushrooms', 'spinach', 'soy sauce', 'vinegar', 'miso', 'curry roux', 'butter', 'cheese', 'milk'];
   for (const k of original) assert.ok(TAPPABLE.has(k), k);
   assert.equal(INGREDIENTS.find((i) => i.key === 'dashi').group, 'Pantry');
@@ -137,7 +137,7 @@ for (const r of RECIPES) {
 }
 
 /* ---------- 3. Named scenarios (written by hand) ---------- */
-const STARTING_FRIDGE_EXPECTED = { now: 3, almost: 1, shop: 16 };
+const STARTING_FRIDGE_EXPECTED = { now: 3, almost: 2, shop: 25 };
 const scenarios = [
   ['chicken-adobo', ['chicken', 'vinegar'], 'almost'],
   ['chicken-adobo', ['chicken', 'soy sauce', 'garlic'], 'shop'],
@@ -203,6 +203,38 @@ const scenarios = [
   ['nikujaga', ['beef', 'potatoes'], 'shop'],
   ['nikujaga', ['beef', 'potatoes', 'onions'], 'almost'],
   ['nikujaga', ['beef', 'onions', 'carrots', 'soy sauce'], 'shop'],
+  /* V1.3 batch 2 */
+  ['shogayaki', ['pork', 'ginger', 'soy sauce'], 'now'],
+  ['shogayaki', ['pork', 'ginger'], 'almost'],
+  ['shogayaki', ['pork', 'soy sauce'], 'shop'],
+  ['teriyaki-chicken', ['chicken', 'soy sauce'], 'now'],
+  ['teriyaki-chicken', ['chicken'], 'almost'],
+  ['teriyaki-chicken', ['soy sauce', 'mirin', 'ginger'], 'shop'],
+  ['butter-soy-mushrooms', ['mushrooms', 'butter', 'soy sauce'], 'now'],
+  ['butter-soy-mushrooms', ['mushrooms', 'butter'], 'almost'],
+  ['butter-soy-mushrooms', ['mushrooms', 'soy sauce'], 'shop'],
+  ['shioyaki', ['fish'], 'now'],
+  ['shioyaki', ['lemon', 'rice'], 'shop'],
+  ['garlic-butter-shrimp', ['shrimp', 'garlic', 'butter'], 'now'],
+  ['garlic-butter-shrimp', ['shrimp', 'garlic'], 'almost'],
+  ['garlic-butter-shrimp', ['shrimp', 'butter'], 'shop'],
+  ['french-toast', ['bread', 'eggs', 'milk'], 'now'],
+  ['french-toast', ['bread', 'eggs'], 'almost'],
+  ['french-toast', ['eggs', 'milk'], 'shop'],
+  ['grilled-cheese', ['bread', 'cheese', 'butter'], 'now'],
+  ['grilled-cheese', ['bread', 'cheese'], 'almost'],
+  ['grilled-cheese', ['bread', 'butter'], 'shop'],
+  ['garlic-butter-pasta', ['pasta', 'garlic', 'butter'], 'now'],
+  ['garlic-butter-pasta', ['noodles', 'garlic', 'butter'], 'shop'],
+  ['garlic-butter-pasta', ['pasta', 'garlic'], 'almost'],
+  ['chicken-pepper-stir-fry', ['chicken', 'bell pepper', 'onions', 'garlic', 'soy sauce'], 'now'],
+  ['chicken-pepper-stir-fry', ['chicken', 'bell pepper'], 'shop'],
+  ['chicken-pepper-stir-fry', ['chicken', 'bell pepper', 'onions'], 'almost'],
+  ['chicken-pepper-stir-fry', ['chicken', 'onions', 'garlic', 'soy sauce'], 'shop'],
+  ['spinach-cheese-omelette', ['eggs', 'spinach', 'cheese'], 'now'],
+  ['spinach-cheese-omelette', ['eggs', 'spinach'], 'almost'],
+  ['spinach-cheese-omelette', ['eggs'], 'shop'],
+  ['spinach-cheese-omelette', ['spinach', 'cheese'], 'shop'],
 ];
 for (const [id, fridge, want] of scenarios) test(id + ' with [' + fridge.join(', ') + '] -> ' + want, () => assert.equal(status(id, fridge), want));
 test('starting fridge: the original ten still give 2 can cook now, 1 almost there, 7 need to shop', () => {
@@ -243,6 +275,19 @@ test('optional chips work: an optional item in the fridge is marked as owned', (
   assert.equal(matchRecipe(by('pancit-canton'), ['oyster sauce']).optional.find((o) => o.item.key === 'oyster sauce').have, true);
 });
 
+test('every fridge item is used by at least one recipe', () => {
+  const used = new Set(RECIPES.flatMap((r) => r.ingredients.filter((i) => !i.staple).flatMap((i) => [i.key].concat(i.anyOf || []))));
+  for (const i of INGREDIENTS) assert.ok(used.has(i.key), i.key + ' is not used by any recipe');
+});
+test('cuisine totals: Filipino 11, Japanese 11, International 8', () => {
+  const n = (c) => RECIPES.filter((r) => r.cuisine === c).length;
+  assert.deepEqual([n('Filipino'), n('Japanese'), n('International')], [11, 11, 8]);
+});
+test('pasta and noodles are different ingredients', () => {
+  assert.equal(status('garlic-butter-pasta', ['noodles', 'garlic', 'butter']), 'shop');
+  assert.equal(status('yakisoba', ['pasta', 'cabbage', 'soy sauce']), 'shop');
+});
+
 /* ---------- 4. Ingredient names and aliases ---------- */
 const same = [
   ['Chicken Breast', 'chicken'], ['chicken thighs', 'chicken'], ['egg', 'eggs'], ['Eggs', 'eggs'], ['tomato', 'tomatoes'],
@@ -251,7 +296,7 @@ const same = [
   ['hondashi', 'dashi'], ['miso paste', 'miso'], ['curry cubes', 'curry roux'], ['bay leaves', 'bay leaf'], ['fish sauce', 'patis'],
   ['  Ground   Pork ', 'pork'],
   ['calamansi', 'lemon'], ['lime', 'lemon'], ['Pancit Canton', 'noodles'], ['kangkong', 'spinach'], ['tomato puree', 'tomato sauce'],
-  ['tamarind soup mix', 'sinigang mix'], ['fish sauce', 'patis'],
+  ['tamarind soup mix', 'sinigang mix'], ['fish sauce', 'patis'], ['spaghetti', 'pasta'], ['Macaroni', 'pasta'],
 ];
 for (const [typed, key] of same) test('"' + typed + '" is recognised as ' + key, () => assert.equal(normalize(typed), key));
 const unchanged = ['asparagus', 'hummus', 'couscous', 'chicken stock', 'chicken broth', 'rice flour', 'garlic powder',

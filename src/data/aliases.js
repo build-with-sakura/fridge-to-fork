@@ -21,6 +21,7 @@ const GROUPS = {
   tofu: ['firm tofu', 'silken tofu', 'soft tofu', 'tokwa'],
   rice: ['cooked rice', 'white rice', 'steamed rice', 'leftover rice', 'day old rice', 'jasmine rice', 'japanese rice', 'kanin', 'gohan'],
   noodles: ['noodle', 'pancit canton', 'canton noodles', 'yakisoba noodles'],
+  pasta: ['spaghetti', 'spaghetti noodles', 'penne', 'macaroni'],
   potatoes: ['potato', 'patatas'],
   carrots: ['carrot'],
   cabbage: ['green cabbage', 'repolyo'],

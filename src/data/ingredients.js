@@ -11,6 +11,7 @@ export const INGREDIENTS = [
   { key: 'rice', label: 'Rice', group: 'Grains' },
   { key: 'noodles', label: 'Noodles', group: 'Grains' },
   { key: 'bread', label: 'Bread', group: 'Grains' },
+  { key: 'pasta', label: 'Pasta', group: 'Grains' },
   { key: 'potatoes', label: 'Potatoes', group: 'Veggies' },
   { key: 'carrots', label: 'Carrots', group: 'Veggies' },
   { key: 'cabbage', label: 'Cabbage', group: 'Veggies' },
