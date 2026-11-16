@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import Icon from '../components/Icon.jsx';
 import Brand from '../components/Brand.jsx';
 import PageHead from '../components/PageHead.jsx';
@@ -14,6 +15,16 @@ const CUISINES = ['All'].concat(RECIPES.map((r) => r.cuisine).filter((c, i, a) =
 export default function Recipes(p) {
   const searching = p.search.trim() !== '';
   const list = filterRecipes(p.list, p.cuisine, p.search);
+  const formRef = useRef(null);
+  const inputRef = useRef(null);
+
+  /* The phone's Search key submits this form. We close the keyboard and bring the
+     search box and results back into view. Typing still filters live as before. */
+  function submitSearch(e) {
+    e.preventDefault();
+    if (inputRef.current) inputRef.current.blur();
+    setTimeout(() => { if (formRef.current) formRef.current.scrollIntoView({ block: 'start' }); }, 60);
+  }
 
   return (
     <>
@@ -21,16 +32,18 @@ export default function Recipes(p) {
       <PageHead title="Recipes" color="#FF7A1A"
         text={p.fridgeCount ? 'Matched to the ' + plural(p.fridgeCount, 'ingredient') + ' in your fridge.' : 'Add ingredients to see what you can cook.'} />
 
-      <label className="search" htmlFor="recipe-search">
-        <Icon name="search" />
-        <input id="recipe-search" type="text" enterKeyHint="search" placeholder="Search recipes by name" value={p.search}
-          autoComplete="off" onChange={(e) => p.setSearch(e.target.value)} />
-        {p.search ? (
-          <button type="button" className="search-clear" aria-label="Clear search" onClick={() => p.setSearch('')}>
-            <Icon name="x" size={18} />
-          </button>
-        ) : null}
-      </label>
+      <form ref={formRef} className="search-form" role="search" action="" onSubmit={submitSearch}>
+        <label className="search" htmlFor="recipe-search">
+          <Icon name="search" />
+          <input ref={inputRef} id="recipe-search" type="search" enterKeyHint="search" placeholder="Search recipes by name" value={p.search}
+            autoComplete="off" autoCorrect="off" spellCheck={false} onChange={(e) => p.setSearch(e.target.value)} />
+          {p.search ? (
+            <button type="button" className="search-clear" aria-label="Clear search" onClick={() => p.setSearch('')}>
+              <Icon name="x" size={18} />
+            </button>
+          ) : null}
+        </label>
+      </form>
 
       <div className="chips" role="group" aria-label="Cuisine">
         {CUISINES.map((c) => (

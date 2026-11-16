@@ -2,6 +2,7 @@
    Checks the recipe data, ingredient names and matching rules. No browser needed. */
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 import { RECIPES } from '../src/data/library.js';
 import { RECIPES as ORIGINAL_RECIPES } from '../src/data/recipes.js';
 import { MORE_RECIPES } from '../src/data/recipes-more.js';
@@ -376,6 +377,17 @@ test('search never changes the recipes or their match results', () => {
 test('search treats special characters as plain text', () => {
   assert.deepEqual(found('All', '(shioyaki)'), ['Salt-Grilled Fish (Shioyaki)']);
   assert.deepEqual(found('All', '.*'), []); assert.deepEqual(found('All', 'stir-fry').length, 2);
+});
+
+/* ---------- 4b. V1.3.1 phone Search key (source checks; the real keyboard needs a phone) ---------- */
+test('recipe search uses a Search keyboard and closes it only on submit', () => {
+  const src = fs.readFileSync(new URL('../src/screens/Recipes.jsx', import.meta.url), 'utf8');
+  assert.match(src, /<form[^>]*role="search"[^>]*onSubmit=\{submitSearch\}/);
+  assert.match(src, /id="recipe-search" type="search" enterKeyHint="search"/);
+  assert.match(src, /e\.preventDefault\(\)/);
+  assert.match(src, /inputRef\.current\.blur\(\)/);
+  assert.equal((src.match(/blur\(\)/g) || []).length, 1, 'blur only in the submit handler');
+  assert.match(src, /onChange=\{\(e\) => p\.setSearch\(e\.target\.value\)\}/);
 });
 
 /* ---------- 5. TheMealDB converter still loads (it is not connected) ---------- */
