@@ -1,0 +1,35 @@
+# Runs the tests and a real Vite build on any branch except main.
+# It never deploys. Only the "Deploy to GitHub Pages" workflow on main does that.
+name: Build check (no deploy)
+
+on:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run the tests
+        run: npm test
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Show what was built
+        run: ls -la dist dist/assets

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { INGREDIENTS, DEFAULT_FRIDGE } from './data/ingredients.js';
+import { DEFAULT_FRIDGE } from './data/ingredients.js';
 import { RECIPES } from './data/recipes.js';
 import { matchRecipe, normalize } from './data/matching.js';
 import { load, save } from './lib/storage.js';
+import { knownIngredient } from './lib/labels.js';
 import Nav from './components/Nav.jsx';
 import Home from './screens/Home.jsx';
 import Fridge from './screens/Fridge.jsx';
@@ -53,11 +54,14 @@ export default function App() {
     window.location.hash = t;
   }
 
-  function toggle(k) {
-    const n = normalize(k);
-    const known = INGREDIENTS.find((i) => normalize(i.key) === n);
-    const key = known ? known.key : n;
-    setFridge((f) => (f.some((x) => normalize(x) === n) ? f.filter((x) => normalize(x) !== n) : f.concat([key])));
+  /* Adds or removes one fridge entry.
+     Tappable items are stored by key. Typed items are stored exactly as typed. */
+  function toggle(entry) {
+    const n = normalize(entry);
+    if (!n) return;
+    const known = knownIngredient(entry);
+    const stored = known ? known.key : String(entry).trim();
+    setFridge((f) => (f.some((x) => normalize(x) === n) ? f.filter((x) => normalize(x) !== n) : f.concat([stored])));
   }
 
   function toggleSave(id) {

@@ -3,14 +3,18 @@ import Icon from '../components/Icon.jsx';
 import Brand from '../components/Brand.jsx';
 import PageHead from '../components/PageHead.jsx';
 import { INGREDIENTS, GROUPS } from '../data/ingredients.js';
-import { normalize } from '../data/matching.js';
-import { labelFor } from '../lib/labels.js';
+import { clean, normalize } from '../data/matching.js';
+import { labelFor, knownIngredient } from '../lib/labels.js';
 
 export default function Fridge({ fridge, toggle, clear, go }) {
   const [q, setQ] = useState('');
+  const cq = clean(q);
   const nq = normalize(q);
-  const shown = INGREDIENTS.filter((i) => !nq || normalize(i.label).includes(nq));
-  const exact = INGREDIENTS.some((i) => normalize(i.key) === nq) || fridge.some((k) => normalize(k) === nq);
+  const inFridge = (key) => fridge.some((x) => normalize(x) === normalize(key));
+  /* Show items whose name contains the typed text, or that the typed text is another name for. */
+  const shown = INGREDIENTS.filter((i) => !cq || clean(i.label).includes(cq) || i.key === nq);
+  /* Offer "Add" only for text that is not already a tappable item and not already in the fridge. */
+  const canAdd = cq && !knownIngredient(q) && !inFridge(q);
 
   return (
     <div className="narrow">
@@ -42,8 +46,8 @@ export default function Fridge({ fridge, toggle, clear, go }) {
         {fridge.length > 0 ? <div><button className="link small" onClick={clear}>Clear all</button></div> : null}
       </section>
 
-      {nq && !exact ? (
-        <button className="chip add" style={{ alignSelf: 'flex-start' }} onClick={() => { toggle(nq); setQ(''); }}>
+      {canAdd ? (
+        <button className="chip add" style={{ alignSelf: 'flex-start' }} onClick={() => { toggle(q); setQ(''); }}>
           <Icon name="plus" size={18} />{'Add "' + q.trim() + '"'}
         </button>
       ) : null}
@@ -59,7 +63,7 @@ export default function Fridge({ fridge, toggle, clear, go }) {
               <h2 className="h-md">{g}</h2>
               <div className="chips">
                 {items.map((i) => {
-                  const on = fridge.includes(i.key);
+                  const on = inFridge(i.key);
                   return (
                     <button key={i.key} className={'chip' + (on ? ' on' : '')} aria-pressed={on} onClick={() => toggle(i.key)}>
                       {on ? <Icon name="check" size={18} weight={2.6} /> : null}{i.label}

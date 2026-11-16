@@ -3,15 +3,20 @@ import Icon from '../components/Icon.jsx';
 import Photo from '../components/Photo.jsx';
 import Badge from '../components/Badge.jsx';
 
-function IngRow({ item, kind }) {
+const TAGS = { miss: 'To buy', have: 'Have it', staple: 'Basic', optional: 'Optional' };
+
+/* One ingredient line. "main" marks an ingredient that defines the dish. */
+function IngRow({ item, kind, have = false, main = false }) {
+  const icon = kind === 'miss' ? 'cart' : kind === 'optional' && !have ? 'plus' : 'check';
   return (
     <div className="ing">
-      <span className={'tick ' + kind} aria-hidden="true"><Icon name={kind === 'miss' ? 'cart' : 'check'} size={15} weight={2.4} /></span>
+      <span className={'tick ' + kind + (have ? ' have' : '')} aria-hidden="true"><Icon name={icon} size={15} weight={2.4} /></span>
       <span className="ing-main">
+        {main ? <b>Main ingredient</b> : null}
         <span>{item.name}</span>
-        <span className="ing-need">{'Recipe needs ' + item.qty}</span>
+        <span className="ing-need">{'Recipe needs ' + item.qty + (item.note ? '. ' + item.note : '')}</span>
       </span>
-      <span className={'tag ' + kind}>{kind === 'miss' ? 'To buy' : kind === 'staple' ? 'Basic' : 'Have it'}</span>
+      <span className={'tag ' + (kind === 'optional' && have ? 'have' : kind)}>{kind === 'optional' && have ? 'Have it' : TAGS[kind]}</span>
     </div>
   );
 }
@@ -19,7 +24,7 @@ function IngRow({ item, kind }) {
 export default function Detail({ recipe, match, saved, onSave, close }) {
   const [copied, setCopied] = useState('');
   const [photo, setPhoto] = useState('none');
-  const basics = recipe.ingredients.filter((i) => i.staple);
+  const isMain = (i) => match.essential.includes(i);
   const time = recipe.time ? <span className="pill"><Icon name="clock" size={15} />{recipe.time + ' min'}</span> : null;
 
   function copy() {
@@ -52,9 +57,11 @@ export default function Detail({ recipe, match, saved, onSave, close }) {
         <p className="lead">{recipe.blurb}</p>
         <div className="chips">
           <span className="pill">{recipe.cuisine}</span>
+          {recipe.serves ? <span className="pill">{'Serves ' + recipe.serves}</span> : null}
           {time}
           <Badge status={match.status} />
         </div>
+        {recipe.timeNote ? <p className="small muted">{recipe.timeNote}</p> : null}
       </section>
 
       {match.missing.length ? (
@@ -63,7 +70,7 @@ export default function Detail({ recipe, match, saved, onSave, close }) {
             <h2 className="h-md">To buy</h2>
             <span className="count">{match.missing.length}</span>
           </div>
-          <div>{match.missing.map((i) => <IngRow key={i.key} item={i} kind="miss" />)}</div>
+          <div>{match.missing.map((i) => <IngRow key={i.key} item={i} kind="miss" main={isMain(i)} />)}</div>
           <div className="row wrap">
             <button className="btn ghost" onClick={copy}><Icon name="cart" size={18} />Copy shopping list</button>
             <span className="small" role="status">{copied}</span>
@@ -72,30 +79,38 @@ export default function Detail({ recipe, match, saved, onSave, close }) {
       ) : (
         <section className="panel aqua stack tight">
           <h2 className="h-md">Nothing to buy</h2>
-          <p className="small">Every key ingredient is in your fridge.</p>
+          <p className="small">Every needed ingredient is in your fridge.</p>
         </section>
       )}
 
-      <p className="amount-note">
-        <b>Check your amounts. </b>
-        We know which ingredients you have, not how much of each. Compare with what the recipe needs.
-      </p>
+      <div className="amount-note note-list">
+        <p><b>Check your amounts. </b>We know which ingredients you have, not how much of each. Compare with what the recipe needs.</p>
+        {(recipe.notes || []).map((n) => <p key={n}>{n}</p>)}
+      </div>
 
       {match.owned.length ? (
         <section className="panel stack tight">
           <div className="row between">
             <h2 className="h-md">In your fridge</h2>
-            <span className="pill">{match.owned.length + ' of ' + match.required.length}</span>
+            <span className="pill">{match.owned.length + ' of ' + match.core.length}</span>
           </div>
-          <div>{match.owned.map((i) => <IngRow key={i.key} item={i} kind="have" />)}</div>
+          <div>{match.owned.map((i) => <IngRow key={i.key} item={i} kind="have" main={isMain(i)} />)}</div>
         </section>
       ) : null}
 
-      {basics.length ? (
+      {match.optional.length ? (
+        <section className="panel stack tight">
+          <h2 className="h-md">Optional extras</h2>
+          <p className="small muted">Nice to have. The recipe works without them.</p>
+          <div>{match.optional.map((o) => <IngRow key={o.item.key} item={o.item} kind="optional" have={o.have} />)}</div>
+        </section>
+      ) : null}
+
+      {match.basics.length ? (
         <section className="panel stack tight">
           <h2 className="h-md">Kitchen basics</h2>
-          <p className="small muted">We assume you have these. They are not counted as missing.</p>
-          <div>{basics.map((i) => <IngRow key={i.key} item={i} kind="staple" />)}</div>
+          <p className="small muted">We assume every kitchen has water, salt, black pepper, sugar and cooking oil. We do not check these. Please check the amounts yourself.</p>
+          <div>{match.basics.map((i) => <IngRow key={i.key} item={i} kind="staple" />)}</div>
         </section>
       ) : null}
 
@@ -114,7 +129,7 @@ export default function Detail({ recipe, match, saved, onSave, close }) {
         </div>
       </section>
 
-      <p className="note">Sample recipe for the prototype. Please check before cooking.</p>
+      <p className="note">Sample recipe. Please check before cooking.</p>
     </div>
   );
 }

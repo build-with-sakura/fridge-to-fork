@@ -99,20 +99,48 @@ Only use photos you own or have a licence for.
 Open `src/data/recipes.js`. Copy one recipe and change it.
 
 - `key` is the plain ingredient name used for matching.
-- `staple: true` marks basics like salt, oil and water. They never count as missing.
+- `role` is `essential`, `required` or `optional`. See "How matching works" below.
+- `staple: true` marks a kitchen basic. Use it only for water, salt, black pepper, sugar and cooking oil.
 - If you add a new ingredient, also add it to `src/data/ingredients.js` so users can tap it.
 
 ## How matching works
 
-Only key ingredients are counted. Basics are ignored.
+Every recipe ingredient has a role.
+
+| Role | Meaning |
+| --- | --- |
+| Essential | Defines the dish. Chicken in Chicken Adobo. |
+| Required | Needed, but not the defining ingredient. |
+| Optional | Garnish, side or suggested extra. Never affects the result. |
+| Kitchen basic | Water, salt, black pepper, sugar, cooking oil. Never checked. |
 
 | Result | Rule |
 | --- | --- |
-| Can Cook Now | Nothing is missing |
-| Almost There | One or two things missing, and you have at least one |
+| Can Cook Now | Every essential and required ingredient is there |
+| Almost There | Every essential is there, you have at least half of essential + required, and only 1 or 2 required are missing |
 | Need to Shop | Everything else |
 
-The app knows which ingredients you have. It does not know how much you have.
+Things to know:
+
+- The app knows which ingredients you have. It does not know how much you have.
+- Kitchen basics are assumed, not checked. Each recipe lists the amounts.
+- "Rice" means you have rice. Recipes that need cooked rice say so.
+- Dashi is not a tappable item. Type "dashi" in the search box to add it.
+
+## Other names for ingredients
+
+`src/data/aliases.js` lists other names people type, such as "chicken breast" for chicken.
+Only exact names in that list are matched. Nothing is guessed.
+To add a name, add one line to that file.
+
+## Tests
+
+```bash
+npm test
+```
+
+This checks the recipe data, the ingredient names and every matching rule.
+The same tests run on GitHub before each build.
 
 ## Not built yet
 

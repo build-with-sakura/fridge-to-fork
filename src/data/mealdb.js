@@ -13,7 +13,7 @@ export function fromMealDb(meal) {
     var name = (meal['strIngredient' + n] || '').trim();
     if (!name) continue;
     var key = normalize(name);
-    ingredients.push({ key: key, name: name, qty: (meal['strMeasure' + n] || '').trim() || 'as needed', staple: STAPLE_KEYS.indexOf(key) !== -1 });
+    ingredients.push({ key: key, name: name, qty: (meal['strMeasure' + n] || '').trim() || 'as needed', role: 'required', staple: STAPLE_KEYS.indexOf(key) !== -1 });
   }
   var steps = String(meal.strInstructions || '').split(/\r?\n+/).map(function (s) { return s.trim(); }).filter(Boolean);
   return { id: 'mealdb-' + meal.idMeal, source: 'themealdb', name: meal.strMeal, cuisine: meal.strArea || 'International', time: null,

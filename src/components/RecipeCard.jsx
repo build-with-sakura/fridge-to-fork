@@ -9,7 +9,7 @@ import { labelFor } from '../lib/labels.js';
 export default function RecipeCard({ recipe, match, variant = 'list', saved, onSave, onOpen }) {
   const mini = variant === 'mini';
   const line = match.missing.length === 0
-    ? 'All ' + match.required.length + ' key ingredients at home'
+    ? 'All ' + match.core.length + ' needed ingredients at home'
     : 'Missing: ' + match.missing.map((i) => labelFor(i.key).toLowerCase()).join(', ');
   return (
     <article className={'card ' + (mini ? 'mini' : 'list')}>
