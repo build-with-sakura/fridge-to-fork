@@ -10,6 +10,7 @@ import { ALIASES } from '../src/data/aliases.js';
 import { matchRecipe, normalize, clean } from '../src/data/matching.js';
 import { labelFor, knownIngredient } from '../src/lib/labels.js';
 import { fromMealDb } from '../src/data/mealdb.js';
+import { matchesName, filterRecipes } from '../src/lib/search.js';
 
 let passed = 0;
 const failures = [];
@@ -330,6 +331,51 @@ test('typed text is shown exactly as typed', () => {
 test('tappable ingredients show their label', () => {
   assert.equal(labelFor('eggs'), 'Eggs'); assert.equal(labelFor('green onions'), 'Green onions');
   assert.equal(knownIngredient('Soy Sauce').key, 'soy sauce'); assert.equal(knownIngredient('chicken breast'), null);
+});
+
+/* ---------- 4b. Recipe-name search ---------- */
+const LIST = RECIPES.map((recipe) => ({ recipe, match: matchRecipe(recipe, DEFAULT_FRIDGE) }));
+const found = (cuisine, query) => filterRecipes(LIST, cuisine, query).map((x) => x.recipe.name).sort();
+test('search: empty or blank text shows every recipe', () => {
+  assert.equal(found('All', '').length, 30); assert.equal(found('All', '   ').length, 30);
+});
+test('search: finds by part of the name', () => {
+  assert.deepEqual(found('All', 'chicken'), ['Chicken Adobo', 'Chicken Afritada', 'Chicken and Bell Pepper Stir-Fry', 'Teriyaki Chicken']);
+  assert.deepEqual(found('All', 'ome'), ['Home-Style Gyudon Beef Bowl', 'Home-Style Nikujaga', 'Home-Style Oyakodon', 'Home-Style Yakisoba', 'Potato Spanish Omelette', 'Spinach and Cheese Omelette']);
+});
+test('search: upper and lower case give the same result', () => {
+  assert.deepEqual(found('All', 'CHICKEN'), found('All', 'chicken'));
+  assert.deepEqual(found('All', 'ChIcKeN'), found('All', 'chicken'));
+  assert.deepEqual(found('All', 'adobo'), ['Chicken Adobo']);
+});
+test('search: spaces around or doubled inside the text are ignored', () => {
+  assert.deepEqual(found('All', '  miso  '), ['Tofu Miso Soup']);
+  assert.deepEqual(found('All', 'garlic   butter'), ['Garlic Butter Pasta', 'Garlic Butter Shrimp']);
+});
+test('search: only the recipe name is searched, not ingredients or cuisine', () => {
+  assert.deepEqual(found('All', 'vinegar'), []); assert.deepEqual(found('All', 'filipino'), []);
+});
+test('search: no match gives an empty list', () => assert.deepEqual(found('All', 'pizza'), []));
+test('search works together with the cuisine filter', () => {
+  assert.deepEqual(found('Japanese', 'chicken'), ['Teriyaki Chicken']);
+  assert.deepEqual(found('Filipino', 'chicken'), ['Chicken Adobo', 'Chicken Afritada']);
+  assert.deepEqual(found('International', 'chicken'), ['Chicken and Bell Pepper Stir-Fry']);
+  assert.deepEqual(found('Japanese', 'adobo'), []);
+  assert.equal(found('Filipino', '').length, 11);
+});
+test('search keeps each recipe in its own match group', () => {
+  const eggs = filterRecipes(LIST, 'All', 'egg');
+  const groups = eggs.map((x) => x.recipe.id + ':' + x.match.status).sort();
+  assert.deepEqual(groups, ['sinangag:now', 'tomato-egg:now']);
+  for (const x of filterRecipes(LIST, 'All', 'chicken')) assert.equal(x.match.status, matchRecipe(x.recipe, DEFAULT_FRIDGE).status);
+});
+test('search never changes the recipes or their match results', () => {
+  const before = JSON.stringify(LIST); filterRecipes(LIST, 'Japanese', 'chicken'); matchesName(RECIPES[0], 'ADOBO');
+  assert.equal(JSON.stringify(LIST), before);
+});
+test('search treats special characters as plain text', () => {
+  assert.deepEqual(found('All', '(shioyaki)'), ['Salt-Grilled Fish (Shioyaki)']);
+  assert.deepEqual(found('All', '.*'), []); assert.deepEqual(found('All', 'stir-fry').length, 2);
 });
 
 /* ---------- 5. TheMealDB converter still loads (it is not connected) ---------- */

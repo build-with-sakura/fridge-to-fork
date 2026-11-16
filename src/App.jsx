@@ -25,6 +25,8 @@ export default function App() {
   const [saved, setSaved] = useState(() => load('f2f.saved', []));
   const [openId, setOpenId] = useState(null);
   const [cuisine, setCuisine] = useState('All');
+  /* Recipe-name search. Kept only while the app is open. It is never saved. */
+  const [search, setSearch] = useState('');
 
   useEffect(() => { save('f2f.fridge', fridge); }, [fridge]);
   useEffect(() => { save('f2f.saved', saved); }, [saved]);
@@ -32,7 +34,7 @@ export default function App() {
   useEffect(() => {
     function onHash() {
       const t = tabFromHash();
-      if (t) { setTab(t); setOpenId(null); }
+      if (t) { setTab(t); setOpenId(null); if (t !== 'recipes') setSearch(''); }
     }
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -50,6 +52,7 @@ export default function App() {
 
   function go(t) {
     setOpenId(null);
+    if (t !== 'recipes') setSearch('');
     setTab(t);
     window.location.hash = t;
   }
@@ -72,7 +75,7 @@ export default function App() {
 
   const shared = {
     list, go, open: setOpenId, isSaved, toggleSave,
-    fridgeCount: fridge.length, savedCount: saved.length, cuisine, setCuisine,
+    fridgeCount: fridge.length, savedCount: saved.length, cuisine, setCuisine, search, setSearch,
   };
   const current = openId ? list.find((x) => x.recipe.id === openId) : null;
 

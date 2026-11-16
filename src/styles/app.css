@@ -99,6 +99,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--ink);outline-of
 .search:focus-within{border-color:var(--pink)}
 .search input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:17px;color:var(--ink)}
 .search input::placeholder{color:var(--muted)}
+.search-clear{flex:none;width:40px;height:40px;margin-right:-10px;border-radius:999px;display:grid;place-items:center;background:#F6F0F7}
 .chips{display:flex;flex-wrap:wrap;gap:9px;min-width:0}
 .chip{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 15px;border-radius:999px;background:#FFFFFF;border:2px solid var(--line);font-weight:600;font-size:15px;transition:transform .08s ease;max-width:100%}
 .chip:active{transform:scale(.95)}

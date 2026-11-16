@@ -14,6 +14,7 @@ This is a React app built with Vite. It has no backend, no login and no paid ser
 - Recipe matching in three groups: Can Cook Now, Almost There, Need to Shop
 - Recipe details with a "To buy" list and a copy button
 - Cuisine filter
+- Recipe search by name, on the Recipes screen. The search text is never saved.
 - Saved recipes
 - Your fridge and saved recipes stay in the browser (local storage)
 
