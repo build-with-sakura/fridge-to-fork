@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_FRIDGE } from './data/ingredients.js';
-import { RECIPES } from './data/recipes.js';
+import { RECIPES } from './data/library.js';
 import { matchRecipe, normalize } from './data/matching.js';
 import { load, save } from './lib/storage.js';
 import { knownIngredient } from './lib/labels.js';

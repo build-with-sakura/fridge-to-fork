@@ -1,7 +1,10 @@
 /* Run with:  npm test
    Checks the recipe data, ingredient names and matching rules. No browser needed. */
 import assert from 'node:assert/strict';
-import { RECIPES } from '../src/data/recipes.js';
+import crypto from 'node:crypto';
+import { RECIPES } from '../src/data/library.js';
+import { RECIPES as ORIGINAL_RECIPES } from '../src/data/recipes.js';
+import { MORE_RECIPES } from '../src/data/recipes-more.js';
 import { INGREDIENTS, DEFAULT_FRIDGE } from '../src/data/ingredients.js';
 import { ALIASES } from '../src/data/aliases.js';
 import { matchRecipe, normalize, clean } from '../src/data/matching.js';
@@ -37,7 +40,20 @@ function subsets(list) {
 const BASICS = ['water', 'salt', 'pepper', 'sugar', 'oil'];
 const TAPPABLE = new Set(INGREDIENTS.map((i) => i.key));
 const NOT_TAPPABLE_BUT_NEEDED = []; /* every needed ingredient must be tappable */
-test('there are exactly 10 recipes', () => assert.equal(RECIPES.length, 10));
+const EXPECTED_RECIPES = 20;
+const EXPECTED_INGREDIENTS = 36;
+const ORIGINAL_IDS = ['chicken-adobo', 'tortang-talong', 'ginisang-repolyo', 'sinangag', 'oyakodon', 'japanese-curry', 'miso-soup', 'gyudon', 'tomato-egg', 'spanish-omelette'];
+test('the library has ' + EXPECTED_RECIPES + ' recipes', () => assert.equal(RECIPES.length, EXPECTED_RECIPES));
+test('the original ten recipes come first, in the same order', () => assert.deepEqual(RECIPES.slice(0, 10).map((r) => r.id), ORIGINAL_IDS));
+test('the original ten recipes are exactly as approved in V1.2 (not edited)', () => {
+  assert.equal(crypto.createHash('sha256').update(JSON.stringify(ORIGINAL_RECIPES)).digest('hex'), '0b1de5ad7a0cc919920dbefe403564ece4a6b145f54544ddac97117c61f38438');
+});
+test('every original recipe still has its photo file name', () => {
+  for (const r of ORIGINAL_RECIPES) assert.equal(r.image, 'images/' + r.id + '.webp');
+});
+test('new recipes have no photo yet, so they show the drawn plate', () => {
+  for (const r of MORE_RECIPES) assert.equal(r.image, '', r.id);
+});
 for (const r of RECIPES) {
   test(r.id + ': has at least one essential ingredient', () => assert.ok(keysOf(r, 'essential').length >= 1));
   test(r.id + ': every ingredient is a basic or has a valid role', () => {
@@ -53,7 +69,11 @@ for (const r of RECIPES) {
   test(r.id + ': every ingredient has a name and a quantity', () => {
     for (const i of r.ingredients) { assert.ok(i.name, i.key); assert.ok(i.qty, i.key); }
   });
-  test(r.id + ': image file name matches the recipe id', () => assert.equal(r.image, 'images/' + r.id + '.webp'));
+  test(r.id + ': photo is empty or named after the recipe id', () => assert.ok(r.image === '' || r.image === 'images/' + r.id + '.webp'));
+  test(r.id + ': id is lowercase with hyphens, and no ingredient is listed twice', () => {
+    assert.match(r.id, /^[a-z-]+$/);
+    assert.equal(new Set(r.ingredients.map((i) => i.key)).size, r.ingredients.length);
+  });
   test(r.id + ': needed ingredients can be selected in the app', () => {
     for (const k of keysOf(r, 'essential').concat(keysOf(r, 'required'))) assert.ok(TAPPABLE.has(k) || NOT_TAPPABLE_BUT_NEEDED.includes(k), k);
   });
@@ -63,13 +83,18 @@ for (const r of RECIPES) {
     if (cookedOptionals.length) assert.ok(/if using|if you have/.test(text));
   });
   test(r.id + ': recipes that need cooked rice say so in the time note', () => {
-    const needsRice = r.ingredients.some((i) => i.key === 'rice' && i.role !== 'optional');
-    if (needsRice) assert.match(r.timeNote || '', /rice is already cooked/);
+    const needsCookedRice = r.ingredients.some((i) => i.key === 'rice' && i.role !== 'optional' && /^Cooked rice/.test(i.name));
+    if (needsCookedRice) assert.match(r.timeNote || '', /rice is already cooked/);
+    const riceLine = r.ingredients.find((i) => i.key === 'rice' && i.role !== 'optional');
+    if (riceLine) assert.match(riceLine.name, /^(Cooked|Uncooked) rice/, 'a needed rice line must say cooked or uncooked');
   });
 }
-test('every recipe id is unique', () => assert.equal(new Set(RECIPES.map((r) => r.id)).size, 10));
-test('the 29 original fridge ingredients are still there, plus Dashi', () => {
-  assert.equal(INGREDIENTS.length, 30);
+test('every recipe id is unique', () => assert.equal(new Set(RECIPES.map((r) => r.id)).size, RECIPES.length));
+test('all earlier fridge ingredients are still there, plus the new ones', () => {
+  assert.equal(INGREDIENTS.length, EXPECTED_INGREDIENTS);
+  assert.equal(new Set(INGREDIENTS.map((i) => i.key)).size, INGREDIENTS.length);
+  for (const i of INGREDIENTS) assert.ok(['Protein', 'Veggies', 'Grains', 'Pantry'].includes(i.group), i.key);
+  for (const k of ['dashi', 'tomato sauce', 'sinigang mix', 'lemon', 'mirin', 'oyster sauce', 'patis']) assert.ok(TAPPABLE.has(k), k);
   const original = ['eggs', 'chicken', 'pork', 'beef', 'fish', 'shrimp', 'tofu', 'rice', 'noodles', 'bread', 'potatoes', 'carrots', 'cabbage', 'onions', 'garlic', 'tomatoes', 'ginger', 'green onions', 'eggplant', 'bell pepper', 'mushrooms', 'spinach', 'soy sauce', 'vinegar', 'miso', 'curry roux', 'butter', 'cheese', 'milk'];
   for (const k of original) assert.ok(TAPPABLE.has(k), k);
   assert.equal(INGREDIENTS.find((i) => i.key === 'dashi').group, 'Pantry');
@@ -112,6 +137,7 @@ for (const r of RECIPES) {
 }
 
 /* ---------- 3. Named scenarios (written by hand) ---------- */
+const STARTING_FRIDGE_EXPECTED = { now: 3, almost: 1, shop: 16 };
 const scenarios = [
   ['chicken-adobo', ['chicken', 'vinegar'], 'almost'],
   ['chicken-adobo', ['chicken', 'soy sauce', 'garlic'], 'shop'],
@@ -142,16 +168,79 @@ const scenarios = [
   ['tomato-egg', ['green onions'], 'shop'],
   ['spanish-omelette', ['potatoes', 'eggs'], 'almost'],
   ['spanish-omelette', ['potatoes', 'eggs', 'onions'], 'now'],
+  /* V1.3 batch 1 */
+  ['pork-sinigang', ['pork', 'sinigang mix', 'tomatoes', 'onions'], 'now'],
+  ['pork-sinigang', ['pork', 'sinigang mix'], 'almost'],
+  ['pork-sinigang', ['pork', 'tomatoes', 'onions'], 'shop'],
+  ['pork-sinigang', ['eggplant', 'spinach', 'rice'], 'shop'],
+  ['tinolang-manok', ['chicken', 'ginger', 'garlic', 'onions'], 'now'],
+  ['tinolang-manok', ['chicken', 'garlic', 'onions'], 'shop'],
+  ['tinolang-manok', ['chicken', 'ginger', 'onions'], 'almost'],
+  ['arroz-caldo', ['rice', 'chicken', 'ginger', 'garlic', 'onions'], 'now'],
+  ['arroz-caldo', ['rice', 'chicken', 'garlic', 'onions'], 'shop'],
+  ['arroz-caldo', ['rice', 'chicken', 'ginger'], 'almost'],
+  ['arroz-caldo', ['chicken', 'ginger', 'garlic', 'onions'], 'shop'],
+  ['bistek-tagalog', ['beef', 'onions', 'soy sauce', 'lemon'], 'now'],
+  ['bistek-tagalog', ['beef', 'onions', 'soy sauce'], 'almost'],
+  ['bistek-tagalog', ['beef', 'soy sauce', 'lemon', 'garlic'], 'shop'],
+  ['chicken-afritada', ['chicken', 'tomato sauce', 'potatoes', 'carrots', 'onions', 'garlic'], 'now'],
+  ['chicken-afritada', ['chicken', 'tomatoes', 'potatoes', 'carrots', 'onions', 'garlic'], 'shop'],
+  ['chicken-afritada', ['chicken', 'tomato sauce', 'onions', 'garlic'], 'almost'],
+  ['chicken-afritada', ['chicken', 'tomato sauce', 'garlic'], 'shop'],
+  ['pancit-canton', ['noodles', 'cabbage', 'carrots', 'garlic', 'onions', 'soy sauce'], 'now'],
+  ['pancit-canton', ['noodles', 'cabbage', 'garlic', 'onions'], 'almost'],
+  ['pancit-canton', ['noodles'], 'shop'],
+  ['pancit-canton', ['chicken', 'cabbage', 'carrots', 'garlic', 'onions', 'soy sauce'], 'shop'],
+  ['paksiw-na-isda', ['fish', 'vinegar', 'ginger', 'garlic'], 'now'],
+  ['paksiw-na-isda', ['fish', 'vinegar'], 'almost'],
+  ['paksiw-na-isda', ['fish', 'ginger', 'garlic'], 'shop'],
+  ['tamagoyaki', ['eggs'], 'now'],
+  ['tamagoyaki', ['soy sauce', 'dashi', 'mirin'], 'shop'],
+  ['yakisoba', ['noodles', 'cabbage', 'soy sauce'], 'now'],
+  ['yakisoba', ['noodles', 'cabbage'], 'almost'],
+  ['yakisoba', ['pork', 'cabbage', 'soy sauce'], 'shop'],
+  ['nikujaga', ['beef', 'potatoes', 'onions', 'carrots', 'soy sauce'], 'now'],
+  ['nikujaga', ['beef', 'potatoes'], 'shop'],
+  ['nikujaga', ['beef', 'potatoes', 'onions'], 'almost'],
+  ['nikujaga', ['beef', 'onions', 'carrots', 'soy sauce'], 'shop'],
 ];
 for (const [id, fridge, want] of scenarios) test(id + ' with [' + fridge.join(', ') + '] -> ' + want, () => assert.equal(status(id, fridge), want));
-test('starting fridge gives 2 can cook now, 1 almost there, 7 need to shop', () => {
+test('starting fridge: the original ten still give 2 can cook now, 1 almost there, 7 need to shop', () => {
+  const c = { now: 0, almost: 0, shop: 0 };
+  ORIGINAL_RECIPES.forEach((r) => { c[matchRecipe(r, DEFAULT_FRIDGE).status]++; });
+  assert.deepEqual(c, { now: 2, almost: 1, shop: 7 });
+});
+test('starting fridge across the whole library', () => {
   const c = { now: 0, almost: 0, shop: 0 };
   RECIPES.forEach((r) => { c[matchRecipe(r, DEFAULT_FRIDGE).status]++; });
-  assert.deepEqual(c, { now: 2, almost: 1, shop: 7 });
+  assert.deepEqual(c, STARTING_FRIDGE_EXPECTED);
 });
 test('ginisang repolyo: soy sauce or oyster sauce counts as the optional seasoning', () => {
   const m = matchRecipe(by('ginisang-repolyo'), ['cabbage', 'garlic', 'onions', 'oyster sauce']);
   assert.equal(m.optional.find((o) => o.item.key === 'patis').have, true);
+});
+
+test('one-ingredient recipes: Can Cook Now with that one item, never Almost There', () => {
+  const single = RECIPES.filter((r) => r.ingredients.filter((i) => !i.staple && i.role !== 'optional').length === 1);
+  for (const r of single) {
+    const only = r.ingredients.find((i) => i.role === 'essential');
+    assert.ok(only, r.id + ' must have its one ingredient marked essential');
+    assert.equal(matchRecipe(r, [only.key]).status, 'now', r.id);
+    assert.equal(matchRecipe(r, r.ingredients.filter((i) => i.role === 'optional').map((i) => i.key)).status, 'shop', r.id);
+    assert.ok(r.ingredients.some((i) => i.staple), r.id + ' should list its kitchen basics so the user can check them');
+  }
+});
+test('Arroz Caldo uses uncooked rice and says so clearly', () => {
+  const r = by('arroz-caldo'); const riceLine = r.ingredients.find((i) => i.key === 'rice');
+  assert.equal(riceLine.role, 'essential'); assert.match(riceLine.name, /^Uncooked rice/);
+  assert.match(r.notes.join(' '), /uncooked rice/); assert.match(r.steps.join(' '), /uncooked rice/);
+  assert.ok(!/rice is already cooked/.test(r.timeNote || ''));
+});
+test('optional chips work: an optional item in the fridge is marked as owned', () => {
+  assert.equal(matchRecipe(by('tinolang-manok'), ['patis']).optional.find((o) => o.item.key === 'patis').have, true);
+  assert.equal(matchRecipe(by('nikujaga'), ['mirin']).optional.find((o) => o.item.key === 'mirin').have, true);
+  assert.equal(matchRecipe(by('pancit-canton'), ['shrimp']).optional.find((o) => o.item.key === 'chicken').have, true);
+  assert.equal(matchRecipe(by('pancit-canton'), ['oyster sauce']).optional.find((o) => o.item.key === 'oyster sauce').have, true);
 });
 
 /* ---------- 4. Ingredient names and aliases ---------- */
@@ -161,6 +250,8 @@ const same = [
   ['talong', 'eggplant'], ['cooked rice', 'rice'], ['rice vinegar', 'vinegar'], ['dashi powder', 'dashi'],
   ['hondashi', 'dashi'], ['miso paste', 'miso'], ['curry cubes', 'curry roux'], ['bay leaves', 'bay leaf'], ['fish sauce', 'patis'],
   ['  Ground   Pork ', 'pork'],
+  ['calamansi', 'lemon'], ['lime', 'lemon'], ['Pancit Canton', 'noodles'], ['kangkong', 'spinach'], ['tomato puree', 'tomato sauce'],
+  ['tamarind soup mix', 'sinigang mix'], ['fish sauce', 'patis'],
 ];
 for (const [typed, key] of same) test('"' + typed + '" is recognised as ' + key, () => assert.equal(normalize(typed), key));
 const unchanged = ['asparagus', 'hummus', 'couscous', 'chicken stock', 'chicken broth', 'rice flour', 'garlic powder',

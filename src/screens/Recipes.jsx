@@ -2,7 +2,7 @@ import Brand from '../components/Brand.jsx';
 import PageHead from '../components/PageHead.jsx';
 import Empty from '../components/Empty.jsx';
 import { RecipeCards } from '../components/RecipeCard.jsx';
-import { RECIPES } from '../data/recipes.js';
+import { RECIPES } from '../data/library.js';
 import { STATUS } from '../data/matching.js';
 import { plural } from '../lib/labels.js';
 

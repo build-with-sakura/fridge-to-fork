@@ -2,7 +2,7 @@ import Icon from '../components/Icon.jsx';
 import Brand from '../components/Brand.jsx';
 import FoodArt from '../components/FoodArt.jsx';
 import { RecipeCards } from '../components/RecipeCard.jsx';
-import { RECIPES } from '../data/recipes.js';
+import { RECIPES } from '../data/library.js';
 import { plural } from '../lib/labels.js';
 
 const CUISINES = [['Filipino', 'p'], ['Japanese', 'o'], ['International', 'a']];

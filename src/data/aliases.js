@@ -20,7 +20,7 @@ const GROUPS = {
   shrimp: ['shrimps', 'prawn', 'prawns', 'hipon'],
   tofu: ['firm tofu', 'silken tofu', 'soft tofu', 'tokwa'],
   rice: ['cooked rice', 'white rice', 'steamed rice', 'leftover rice', 'day old rice', 'jasmine rice', 'japanese rice', 'kanin', 'gohan'],
-  noodles: ['noodle'],
+  noodles: ['noodle', 'pancit canton', 'canton noodles', 'yakisoba noodles'],
   potatoes: ['potato', 'patatas'],
   carrots: ['carrot'],
   cabbage: ['green cabbage', 'repolyo'],
@@ -32,12 +32,16 @@ const GROUPS = {
   eggplant: ['eggplants', 'aubergine', 'aubergines', 'japanese eggplant', 'talong', 'nasu'],
   'bell pepper': ['bell peppers', 'capsicum'],
   mushrooms: ['mushroom', 'shiitake'],
+  spinach: ['kangkong', 'water spinach'],
+  lemon: ['lemons', 'lemon juice', 'calamansi', 'calamansi juice', 'lime'],
   'soy sauce': ['toyo', 'shoyu', 'light soy sauce'],
   vinegar: ['white vinegar', 'cane vinegar', 'rice vinegar', 'apple cider vinegar', 'suka'],
   miso: ['miso paste', 'white miso', 'red miso', 'awase miso'],
   'curry roux': ['japanese curry roux', 'curry roux block', 'curry roux blocks', 'curry cube', 'curry cubes', 'curry block', 'curry blocks'],
-  /* Used by recipes, but not shown as tappable fridge items. */
+  'tomato sauce': ['tomato puree'],
+  'sinigang mix': ['sinigang soup mix', 'sinigang sa sampalok mix', 'tamarind soup mix'],
   dashi: ['dashi stock', 'dashi powder', 'dashi granules', 'hondashi'],
+  /* Used by a recipe as an optional extra, but not shown as a tappable fridge item. */
   'bay leaf': ['bay leaves', 'laurel', 'laurel leaf', 'laurel leaves'],
   patis: ['fish sauce'],
 };

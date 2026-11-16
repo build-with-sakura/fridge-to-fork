@@ -1,4 +1,4 @@
-import { RECIPES } from '../data/recipes.js';
+import { RECIPES } from '../data/library.js';
 import { DISH, TINTS, plate, C, keyed } from './dishArt.js';
 
 /* The drawn dish picture. Used as the fallback behind every photo. */
