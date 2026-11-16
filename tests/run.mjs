@@ -53,7 +53,7 @@ for (const r of RECIPES) {
   test(r.id + ': every ingredient has a name and a quantity', () => {
     for (const i of r.ingredients) { assert.ok(i.name, i.key); assert.ok(i.qty, i.key); }
   });
-  test(r.id + ': image file name matches the recipe id', () => assert.equal(r.image, 'images/' + r.id + '.jpg'));
+  test(r.id + ': image file name matches the recipe id', () => assert.equal(r.image, 'images/' + r.id + '.webp'));
   test(r.id + ': needed ingredients can be selected in the app', () => {
     for (const k of keysOf(r, 'essential').concat(keysOf(r, 'required'))) assert.ok(TAPPABLE.has(k) || NOT_TAPPABLE_BUT_NEEDED.includes(k), k);
   });

@@ -28,7 +28,7 @@
 export const RECIPES = [
   {
     id: 'chicken-adobo', name: 'Chicken Adobo', cuisine: 'Filipino', serves: '3 to 4', time: 45,
-    image: 'images/chicken-adobo.jpg', imageCredit: '',
+    image: 'images/chicken-adobo.webp', imageCredit: '',
     blurb: 'Savory, tangy chicken braised in soy sauce and vinegar.',
     notes: [],
     ingredients: [
@@ -52,7 +52,7 @@ export const RECIPES = [
   },
   {
     id: 'tortang-talong', name: 'Tortang Talong', cuisine: 'Filipino', serves: '2', time: 25,
-    image: 'images/tortang-talong.jpg', imageCredit: '',
+    image: 'images/tortang-talong.webp', imageCredit: '',
     blurb: 'Smoky grilled eggplant dipped in egg and pan-fried.',
     notes: [],
     ingredients: [
@@ -72,7 +72,7 @@ export const RECIPES = [
   },
   {
     id: 'ginisang-repolyo', name: 'Ginisang Repolyo', cuisine: 'Filipino', serves: '2 to 3', time: 20,
-    image: 'images/ginisang-repolyo.jpg', imageCredit: '',
+    image: 'images/ginisang-repolyo.webp', imageCredit: '',
     blurb: 'Quick sauteed cabbage with garlic and onion. Add pork or carrot if you have them.',
     notes: ['Works with cabbage, garlic and onion alone. Pork and carrot are extras.'],
     ingredients: [
@@ -96,7 +96,7 @@ export const RECIPES = [
   {
     id: 'sinangag', name: 'Sinangag with Egg', cuisine: 'Filipino', serves: '2', time: 15,
     timeNote: 'Time assumes the rice is already cooked and cold.',
-    image: 'images/sinangag.jpg', imageCredit: '',
+    image: 'images/sinangag.webp', imageCredit: '',
     blurb: 'Garlic fried rice topped with a fried egg.',
     notes: ['The rice must be cooked and cooled first. Uncooked rice will not work. Day-old rice is best.'],
     ingredients: [
@@ -117,7 +117,7 @@ export const RECIPES = [
   {
     id: 'oyakodon', name: 'Home-Style Oyakodon', cuisine: 'Japanese', serves: '2', time: 25,
     timeNote: 'Time assumes the rice is already cooked.',
-    image: 'images/oyakodon.jpg', imageCredit: '',
+    image: 'images/oyakodon.webp', imageCredit: '',
     blurb: 'A simple home-style version. Chicken and egg simmered together over rice.',
     notes: ['This is a simple home version. Dashi and mirin give a more classic taste, but it works without them.'],
     ingredients: [
@@ -142,7 +142,7 @@ export const RECIPES = [
   {
     id: 'japanese-curry', name: 'Japanese Curry Rice', cuisine: 'Japanese', serves: '4', time: 45,
     timeNote: 'Time assumes the rice is already cooked.',
-    image: 'images/japanese-curry.jpg', imageCredit: '',
+    image: 'images/japanese-curry.webp', imageCredit: '',
     blurb: 'Thick curry with chunky vegetables over rice. Add chicken if you like.',
     notes: [
       'Roux brands differ. Follow the roux and water amounts on your box.',
@@ -168,7 +168,7 @@ export const RECIPES = [
   },
   {
     id: 'miso-soup', name: 'Tofu Miso Soup', cuisine: 'Japanese', serves: '2', time: 10,
-    image: 'images/miso-soup.jpg', imageCredit: '',
+    image: 'images/miso-soup.webp', imageCredit: '',
     blurb: 'A warm, simple soup ready in ten minutes.',
     notes: [
       'Check your miso label. Some miso paste already contains dashi. Many do not.',
@@ -192,7 +192,7 @@ export const RECIPES = [
   {
     id: 'gyudon', name: 'Home-Style Gyudon Beef Bowl', cuisine: 'Japanese', serves: '2', time: 20,
     timeNote: 'Time assumes the rice is already cooked.',
-    image: 'images/gyudon.jpg', imageCredit: '',
+    image: 'images/gyudon.webp', imageCredit: '',
     blurb: 'A simple home-style version. Thin beef and sweet onion simmered over rice.',
     notes: ['This is a simple home version. Dashi, mirin and ginger give a more classic taste, but it works without them.'],
     ingredients: [
@@ -216,7 +216,7 @@ export const RECIPES = [
   },
   {
     id: 'tomato-egg', name: 'Tomato Egg Stir-Fry', cuisine: 'International', serves: '2', time: 15,
-    image: 'images/tomato-egg.jpg', imageCredit: '',
+    image: 'images/tomato-egg.webp', imageCredit: '',
     blurb: 'A Chinese home-style classic. Soft scrambled egg in a sweet, juicy tomato sauce.',
     notes: [],
     ingredients: [
@@ -237,7 +237,7 @@ export const RECIPES = [
   },
   {
     id: 'spanish-omelette', name: 'Potato Spanish Omelette', cuisine: 'International', serves: '4', time: 35,
-    image: 'images/spanish-omelette.jpg', imageCredit: '',
+    image: 'images/spanish-omelette.webp', imageCredit: '',
     blurb: 'A classic from Spain, also called tortilla de patatas. A thick, golden omelette of potato and onion.',
     notes: ['This recipe needs about 1/2 cup of oil. A small splash is not enough. The potatoes cook slowly in it.'],
     ingredients: [
