@@ -179,6 +179,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--ink);outline-of
 .tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;flex:none;white-space:nowrap}
 .tag.have{background:var(--aqua-soft)} .tag.miss{background:var(--orange)} .tag.staple{background:#F1EAF2}
 .tag.optional{background:#F1EAF2}
+.optional-matches{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.optional-matches li{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.optional-matches .link{text-align:left;flex:1;min-width:0}
 .tick.optional{background:#F1EAF2}
 .tick.optional.have{background:var(--aqua)}
 .ing-main b{font-size:12px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:.04em}

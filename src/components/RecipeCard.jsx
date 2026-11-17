@@ -2,15 +2,13 @@ import Icon from './Icon.jsx';
 import Photo from './Photo.jsx';
 import Badge from './Badge.jsx';
 import Heart from './Heart.jsx';
-import { labelFor } from '../lib/labels.js';
+import { missingLine } from '../lib/cardLine.js';
 
 /* variant "mini" = small card for the Home carousel.
    variant "list" = compact row on phones, photo card on wide screens. */
 export default function RecipeCard({ recipe, match, variant = 'list', saved, onSave, onOpen }) {
   const mini = variant === 'mini';
-  const line = match.missing.length === 0
-    ? 'All ' + match.core.length + ' needed ingredients at home'
-    : 'Missing: ' + match.missing.map((i) => labelFor(i.key).toLowerCase()).join(', ');
+  const line = missingLine(match);
   return (
     <article className={'card ' + (mini ? 'mini' : 'list')}>
       <button className="card-open" onClick={onOpen} aria-label={'Open ' + recipe.name}>

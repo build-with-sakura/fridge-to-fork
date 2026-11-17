@@ -11,7 +11,8 @@ import { ALIASES } from '../src/data/aliases.js';
 import { matchRecipe, normalize, clean } from '../src/data/matching.js';
 import { labelFor, knownIngredient } from '../src/lib/labels.js';
 import { fromMealDb } from '../src/data/mealdb.js';
-import { matchesName, filterRecipes } from '../src/lib/search.js';
+import { matchesName, filterRecipes, optionalMatches } from '../src/lib/search.js';
+import { missingLine } from '../src/lib/cardLine.js';
 
 let passed = 0;
 const failures = [];
@@ -334,49 +335,160 @@ test('tappable ingredients show their label', () => {
   assert.equal(knownIngredient('Soy Sauce').key, 'soy sauce'); assert.equal(knownIngredient('chicken breast'), null);
 });
 
-/* ---------- 4b. Recipe-name search ---------- */
+/* ---------- 4b. Recipe search: name OR main/needed ingredient (V1.4) ---------- */
 const LIST = RECIPES.map((recipe) => ({ recipe, match: matchRecipe(recipe, DEFAULT_FRIDGE) }));
 const found = (cuisine, query) => filterRecipes(LIST, cuisine, query).map((x) => x.recipe.name).sort();
+/* Name-only helper: proves the V1.3 name search is unchanged. */
+const byName = (cuisine, query) => LIST.filter((x) => (cuisine === 'All' || x.recipe.cuisine === cuisine) && matchesName(x.recipe, query)).map((x) => x.recipe.name).sort();
+/* Independent spec of the V1.4 rule, written from the data, not from search.js. */
+const keysWith = (r, pick) => r.ingredients.filter((i) => !i.staple && pick(i.role)).flatMap((i) => [i.key].concat(i.anyOf || [])).map(normalize);
+const specCore = (r) => keysWith(r, (role) => role !== 'optional');
+const specOpt = (r) => keysWith(r, (role) => role === 'optional');
+const specFound = (cuisine, q) => LIST.filter((x) => (cuisine === 'All' || x.recipe.cuisine === cuisine) &&
+  (x.recipe.name.toLowerCase().includes(q.trim().toLowerCase().replace(/\s+/g, ' ')) || specCore(x.recipe).includes(normalize(q))))
+  .map((x) => x.recipe.name).sort();
+const optNames = (cuisine, q) => optionalMatches(LIST, cuisine, q).map((x) => x.recipe.name).sort();
+const STAPLES = ['water', 'salt', 'pepper', 'sugar', 'oil'];
+
 test('search: empty or blank text shows every recipe', () => {
   assert.equal(found('All', '').length, 30); assert.equal(found('All', '   ').length, 30);
 });
-test('search: finds by part of the name', () => {
-  assert.deepEqual(found('All', 'chicken'), ['Chicken Adobo', 'Chicken Afritada', 'Chicken and Bell Pepper Stir-Fry', 'Teriyaki Chicken']);
+test('name search (V1.3) is unchanged: part of the name', () => {
+  assert.deepEqual(byName('All', 'chicken'), ['Chicken Adobo', 'Chicken Afritada', 'Chicken and Bell Pepper Stir-Fry', 'Teriyaki Chicken']);
   assert.deepEqual(found('All', 'ome'), ['Home-Style Gyudon Beef Bowl', 'Home-Style Nikujaga', 'Home-Style Oyakodon', 'Home-Style Yakisoba', 'Potato Spanish Omelette', 'Spinach and Cheese Omelette']);
+  assert.deepEqual(found('All', 'chick').length, 4, 'half a word matches names only');
 });
 test('search: upper and lower case give the same result', () => {
   assert.deepEqual(found('All', 'CHICKEN'), found('All', 'chicken'));
   assert.deepEqual(found('All', 'ChIcKeN'), found('All', 'chicken'));
+  assert.deepEqual(found('All', 'ITLOG'), found('All', 'itlog'));
   assert.deepEqual(found('All', 'adobo'), ['Chicken Adobo']);
 });
 test('search: spaces around or doubled inside the text are ignored', () => {
-  assert.deepEqual(found('All', '  miso  '), ['Tofu Miso Soup']);
+  assert.deepEqual(found('All', '  miso  '), found('All', 'miso'));
   assert.deepEqual(found('All', 'garlic   butter'), ['Garlic Butter Pasta', 'Garlic Butter Shrimp']);
+  assert.deepEqual(found('All', '  soy   sauce '), found('All', 'soy sauce'));
 });
-test('search: only the recipe name is searched, not ingredients or cuisine', () => {
-  assert.deepEqual(found('All', 'vinegar'), []); assert.deepEqual(found('All', 'filipino'), []);
-});
+test('search: cuisine names are not searched', () => assert.deepEqual(found('All', 'filipino'), []));
 test('search: no match gives an empty list', () => assert.deepEqual(found('All', 'pizza'), []));
-test('search works together with the cuisine filter', () => {
-  assert.deepEqual(found('Japanese', 'chicken'), ['Teriyaki Chicken']);
-  assert.deepEqual(found('Filipino', 'chicken'), ['Chicken Adobo', 'Chicken Afritada']);
-  assert.deepEqual(found('International', 'chicken'), ['Chicken and Bell Pepper Stir-Fry']);
+test('name search still works together with the cuisine filter', () => {
+  assert.deepEqual(byName('Japanese', 'chicken'), ['Teriyaki Chicken']);
+  assert.deepEqual(byName('Filipino', 'chicken'), ['Chicken Adobo', 'Chicken Afritada']);
+  assert.deepEqual(byName('International', 'chicken'), ['Chicken and Bell Pepper Stir-Fry']);
   assert.deepEqual(found('Japanese', 'adobo'), []);
   assert.equal(found('Filipino', '').length, 11);
 });
-test('search keeps each recipe in its own match group', () => {
-  const eggs = filterRecipes(LIST, 'All', 'egg');
-  const groups = eggs.map((x) => x.recipe.id + ':' + x.match.status).sort();
-  assert.deepEqual(groups, ['sinangag:now', 'tomato-egg:now']);
+test('name search keeps each recipe in its own match group', () => {
+  assert.deepEqual(LIST.filter((x) => matchesName(x.recipe, 'egg')).map((x) => x.recipe.id + ':' + x.match.status).sort(), ['sinangag:now', 'tomato-egg:now']);
   for (const x of filterRecipes(LIST, 'All', 'chicken')) assert.equal(x.match.status, matchRecipe(x.recipe, DEFAULT_FRIDGE).status);
 });
 test('search never changes the recipes or their match results', () => {
-  const before = JSON.stringify(LIST); filterRecipes(LIST, 'Japanese', 'chicken'); matchesName(RECIPES[0], 'ADOBO');
+  const before = JSON.stringify(LIST); filterRecipes(LIST, 'Japanese', 'chicken'); optionalMatches(LIST, 'All', 'fish sauce'); matchesName(RECIPES[0], 'ADOBO');
   assert.equal(JSON.stringify(LIST), before);
 });
 test('search treats special characters as plain text', () => {
   assert.deepEqual(found('All', '(shioyaki)'), ['Salt-Grilled Fish (Shioyaki)']);
   assert.deepEqual(found('All', '.*'), []); assert.deepEqual(found('All', 'stir-fry').length, 2);
+});
+
+/* Ingredient search: every fridge item and every alias, in every cuisine, equals the spec. */
+for (const term of INGREDIENTS.map((i) => i.key).concat(INGREDIENTS.map((i) => i.label), Object.keys(ALIASES))) {
+  test('ingredient search equals the spec: "' + term + '"', () => {
+    for (const c of ['All', 'Filipino', 'Japanese', 'International']) assert.deepEqual(found(c, term), specFound(c, term), c);
+  });
+}
+test('aliases give the same results as the ingredient', () => {
+  assert.deepEqual(found('All', 'itlog'), found('All', 'eggs'));
+  assert.deepEqual(found('All', 'kanin'), found('All', 'rice'));
+  assert.deepEqual(found('All', 'toyo'), found('All', 'soy sauce'));
+  assert.deepEqual(found('All', 'chicken breast'), specFound('All', 'chicken'));
+});
+test('examples from the approved proposal', () => {
+  assert.equal(found('All', 'chicken').length, 7);
+  assert.ok(!found('All', 'chicken').includes('Japanese Curry Rice') && !found('All', 'chicken').includes('Pancit Canton'), 'chicken is optional there');
+  assert.equal(found('All', 'egg').length, 8); assert.ok(!found('All', 'egg').includes('Arroz Caldo'));
+  assert.equal(found('All', 'rice').length, 5); assert.equal(found('All', 'kanin').length, 5);
+  assert.equal(found('All', 'toyo').length, 11);
+  assert.deepEqual(found('All', 'kangkong'), ['Spinach and Cheese Omelette']);
+  assert.deepEqual(found('All', 'fish sauce'), []);
+  assert.deepEqual(found('All', 'vinegar'), specFound('All', 'vinegar')); assert.ok(found('All', 'vinegar').includes('Chicken Adobo'));
+});
+test('"egg" never matches a recipe only because of eggplant', () => {
+  for (const x of filterRecipes(LIST, 'All', 'egg')) assert.ok(specCore(x.recipe).includes('eggs') || matchesName(x.recipe, 'egg'), x.recipe.id);
+});
+test('optional extras never cause a primary match', () => {
+  for (const r of RECIPES) for (const k of specOpt(r)) {
+    if (specCore(r).includes(k) || matchesName(r, k)) continue;
+    assert.ok(!filterRecipes(LIST, 'All', k).some((x) => x.recipe.id === r.id), r.id + ' / ' + k);
+  }
+});
+test('kitchen basics never match as ingredients (names still can)', () => {
+  for (const k of STAPLES) assert.deepEqual(found('All', k), byName('All', k), k);
+  assert.deepEqual(found('All', 'salt'), ['Salt-Grilled Fish (Shioyaki)']);
+  assert.deepEqual(found('All', 'oil'), byName('All', 'oil'));
+});
+test('several words are one phrase', () => {
+  assert.deepEqual(found('All', 'chicken rice'), []);
+  assert.deepEqual(found('All', 'soy sauce'), specFound('All', 'soy sauce'));
+  assert.deepEqual(found('All', 'green onions'), []);
+});
+
+/* Optional-only discovery message */
+test('optional matches: shown only when there is no primary result', () => {
+  assert.deepEqual(optNames('All', 'fish sauce'), ['Arroz Caldo', 'Ginisang Repolyo', 'Tinolang Manok']);
+  assert.deepEqual(optNames('All', 'rice'), [], 'rice has primary results');
+  assert.deepEqual(optNames('All', 'pork'), [], 'name matches are never replaced');
+  assert.deepEqual(optNames('All', 'chicken'), []);
+  assert.deepEqual(optNames('All', 'pizza'), []); assert.deepEqual(optNames('All', ''), []);
+  assert.deepEqual(optNames('All', 'salt'), [], 'basics are never suggested');
+});
+test('optional matches respect the cuisine filter', () => {
+  assert.deepEqual(optNames('Filipino', 'fish sauce'), ['Arroz Caldo', 'Ginisang Repolyo', 'Tinolang Manok']);
+  assert.deepEqual(optNames('Japanese', 'fish sauce'), []);
+  assert.deepEqual(optNames('Japanese', 'green onions'), ['Butter Soy Mushrooms', 'Tofu Miso Soup']);
+  /* kangkong has a primary result in All (International) but not in Filipino */
+  assert.deepEqual(optNames('All', 'kangkong'), []);
+  assert.deepEqual(optNames('Filipino', 'kangkong'), ['Pork Sinigang', 'Tinolang Manok']);
+});
+test('optional matches equal the spec for every term and cuisine', () => {
+  const terms = INGREDIENTS.map((i) => i.key).concat(Object.keys(ALIASES));
+  for (const t of terms) for (const c of ['All', 'Filipino', 'Japanese', 'International']) {
+    const want = found(c, t).length ? [] : LIST.filter((x) => (c === 'All' || x.recipe.cuisine === c) && specOpt(x.recipe).includes(normalize(t))).map((x) => x.recipe.name).sort();
+    assert.deepEqual(optNames(c, t), want, c + ' / ' + t);
+  }
+});
+
+/* ---------- 4c. Missing-ingredient line on recipe cards (V1.4) ---------- */
+const lineFor = (id) => missingLine(matchRecipe(by(id), DEFAULT_FRIDGE));
+const fake = (status, ess, req, core = 6) => ({ status, core: Array(core).fill({}), missingEssential: ess.map((key) => ({ key })), missingRequired: req.map((key) => ({ key })), missing: ess.concat(req).map((key) => ({ key })) });
+test('card line: Can Cook Now', () => {
+  const m = matchRecipe(by('tomato-egg'), DEFAULT_FRIDGE); assert.equal(m.status, 'now');
+  assert.equal(missingLine(m), 'All ' + m.core.length + ' needed ingredients at home');
+});
+test('card line: Almost There says how many to buy', () => {
+  assert.equal(lineFor('teriyaki-chicken'), 'Buy 1 more: soy sauce');
+  assert.equal(missingLine(fake('almost', [], ['vinegar', 'carrots'])), 'Buy 2 more: vinegar, carrots');
+});
+test('card line: Need to Shop names the missing main ingredient first', () => {
+  assert.equal(lineFor('chicken-adobo'), 'Missing main: vinegar · Also: soy sauce');
+  assert.equal(lineFor('chicken-afritada'), 'Missing main: tomato sauce · Also: potatoes, carrots');
+  assert.equal(missingLine(fake('shop', ['pork'], [])), 'Missing main: pork');
+});
+test('card line: Need to Shop with the main ingredient at home', () => {
+  assert.equal(missingLine(fake('shop', [], ['vinegar', 'carrots', 'potatoes'])), 'Need 3 more: vinegar, carrots, potatoes');
+});
+test('card line: long lists show 3 names, then "+N more"', () => {
+  assert.equal(missingLine(fake('shop', ['pork'], ['vinegar', 'carrots', 'potatoes', 'ginger'])), 'Missing main: pork · Also: vinegar, carrots +2 more');
+  assert.equal(missingLine(fake('shop', [], ['vinegar', 'carrots', 'potatoes', 'ginger'])), 'Need 4 more: vinegar, carrots, potatoes +1 more');
+  assert.match(lineFor('pancit-canton'), /\+1 more$/);
+});
+test('card line uses the same items as the To buy list, never optional or basics', () => {
+  for (const r of RECIPES) {
+    const m = matchRecipe(r, DEFAULT_FRIDGE); const line = missingLine(m);
+    for (const i of m.missing.slice(0, 3)) assert.ok(line.includes(labelFor(i.key).toLowerCase()), r.id + ' ' + i.key);
+    const extra = Math.max(0, m.missing.length - 3); if (extra) assert.ok(line.endsWith('+' + extra + ' more'), r.id);
+    assert.ok(!m.missing.some((i) => i.role === 'optional' || i.staple), r.id);
+  }
 });
 
 /* ---------- 4b. V1.3.1 phone Search key (source checks; the real keyboard needs a phone) ---------- */

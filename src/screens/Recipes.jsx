@@ -7,7 +7,7 @@ import { RecipeCards } from '../components/RecipeCard.jsx';
 import { RECIPES } from '../data/library.js';
 import { STATUS } from '../data/matching.js';
 import { plural } from '../lib/labels.js';
-import { filterRecipes } from '../lib/search.js';
+import { filterRecipes, optionalMatches } from '../lib/search.js';
 
 const DOTS = { now: 'var(--aqua)', almost: 'var(--yellow)', shop: 'var(--orange)' };
 const CUISINES = ['All'].concat(RECIPES.map((r) => r.cuisine).filter((c, i, a) => a.indexOf(c) === i));
@@ -15,6 +15,8 @@ const CUISINES = ['All'].concat(RECIPES.map((r) => r.cuisine).filter((c, i, a) =
 export default function Recipes(p) {
   const searching = p.search.trim() !== '';
   const list = filterRecipes(p.list, p.cuisine, p.search);
+  /* Only filled when the search found nothing else (see search.js). */
+  const extras = searching ? optionalMatches(p.list, p.cuisine, p.search) : [];
   const formRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -35,7 +37,7 @@ export default function Recipes(p) {
       <form ref={formRef} className="search-form" role="search" action="" onSubmit={submitSearch}>
         <label className="search" htmlFor="recipe-search">
           <Icon name="search" />
-          <input ref={inputRef} id="recipe-search" type="search" enterKeyHint="search" placeholder="Search recipes by name" value={p.search}
+          <input ref={inputRef} id="recipe-search" type="search" enterKeyHint="search" placeholder="Recipe or ingredient" value={p.search}
             autoComplete="off" autoCorrect="off" spellCheck={false} onChange={(e) => p.setSearch(e.target.value)} />
           {p.search ? (
             <button type="button" className="search-clear" aria-label="Clear search" onClick={() => p.setSearch('')}>
@@ -56,9 +58,28 @@ export default function Recipes(p) {
           action="Open My Fridge" onAction={() => p.go('fridge')} />
       ) : null}
 
-      {searching && list.length === 0 ? (
+      {searching && list.length === 0 && extras.length === 0 ? (
         <div className="stack" role="status">
-          <p className="panel flat muted" style={{ borderStyle: 'dashed', borderWidth: 2 }}>No recipes match that name.</p>
+          <p className="panel flat muted" style={{ borderStyle: 'dashed', borderWidth: 2 }}>No recipes match that name or ingredient.</p>
+          <div><button className="link small" onClick={() => p.setSearch('')}>Clear search</button></div>
+        </div>
+      ) : null}
+
+      {extras.length ? (
+        <div className="stack" role="status">
+          <div className="panel flat stack" style={{ borderStyle: 'dashed', borderWidth: 2 }}>
+            <p className="muted">
+              No {p.cuisine === 'All' ? '' : p.cuisine + ' '}recipe needs “{p.search.trim().replace(/\s+/g, ' ')}”. It is only an optional extra in {extras.length === 1 ? 'this recipe' : 'these recipes'}:
+            </p>
+            <ul className="optional-matches">
+              {extras.map((x) => (
+                <li key={x.recipe.id}>
+                  <button className="link" onClick={() => p.open(x.recipe.id)}>{x.recipe.name}</button>
+                  <span className="tag optional">Optional match</span>
+                </li>
+              ))}
+            </ul>
+          </div>
           <div><button className="link small" onClick={() => p.setSearch('')}>Clear search</button></div>
         </div>
       ) : null}
