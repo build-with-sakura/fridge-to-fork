@@ -54,8 +54,23 @@ test('the original ten recipes are exactly as approved in V1.2 (not edited)', ()
 test('every original recipe still has its photo file name', () => {
   for (const r of ORIGINAL_RECIPES) assert.equal(r.image, 'images/' + r.id + '.webp');
 });
-test('new recipes have no photo yet, so they show the drawn plate', () => {
-  for (const r of MORE_RECIPES) assert.equal(r.image, '', r.id);
+/* V1.5: photos are added batch by batch. Recipes without one keep the drawn plate. */
+const PHOTO_BATCHES_DONE = ['pork-sinigang', 'tinolang-manok', 'arroz-caldo', 'bistek-tagalog', 'chicken-afritada'];
+test('new recipes: photo set only for finished batches, others keep the drawn plate', () => {
+  for (const r of MORE_RECIPES) assert.equal(r.image, PHOTO_BATCHES_DONE.includes(r.id) ? 'images/' + r.id + '.webp' : '', r.id);
+});
+test('every photo a recipe points to exists, is WebP and is under 300 KB', () => {
+  for (const r of RECIPES.filter((x) => x.image)) {
+    const f = new URL('../public/' + r.image, import.meta.url);
+    assert.ok(fs.existsSync(f), r.image);
+    const b = fs.readFileSync(f);
+    assert.equal(b.toString('ascii', 0, 4) + b.toString('ascii', 8, 12), 'RIFFWEBP', r.image);
+    assert.ok(b.length <= 300 * 1024, r.image);
+  }
+});
+test('no photo file is left unused', () => {
+  const used = new Set(RECIPES.map((r) => r.image).filter(Boolean).map((x) => x.replace('images/', '')));
+  for (const f of fs.readdirSync(new URL('../public/images/', import.meta.url)).filter((x) => x.endsWith('.webp'))) assert.ok(used.has(f), f);
 });
 for (const r of RECIPES) {
   test(r.id + ': has at least one essential ingredient', () => assert.ok(keysOf(r, 'essential').length >= 1));

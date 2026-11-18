@@ -11,7 +11,7 @@
 export const MORE_RECIPES = [
   {
     id: 'pork-sinigang', name: 'Pork Sinigang', cuisine: 'Filipino', serves: '4', time: 60,
-    image: '', imageCredit: '',
+    image: 'images/pork-sinigang.webp', imageCredit: '',
     blurb: 'A sour, comforting tamarind soup with tender pork.',
     notes: ['Sinigang mix brands differ. Follow the water amount on your packet.'],
     ingredients: [
@@ -35,7 +35,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'tinolang-manok', name: 'Tinolang Manok', cuisine: 'Filipino', serves: '4', time: 45,
-    image: '', imageCredit: '',
+    image: 'images/tinolang-manok.webp', imageCredit: '',
     blurb: 'A light, warming chicken soup with lots of ginger.',
     notes: ['Traditional tinola also has green papaya or sayote. If you have some, add it with the water.'],
     ingredients: [
@@ -60,7 +60,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'arroz-caldo', name: 'Arroz Caldo', cuisine: 'Filipino', serves: '4', time: 45,
-    image: '', imageCredit: '',
+    image: 'images/arroz-caldo.webp', imageCredit: '',
     blurb: 'Thick chicken and rice porridge with ginger. Perfect for cold or rainy days.',
     notes: ['This recipe uses uncooked rice. It cooks in the pot with the chicken.'],
     ingredients: [
@@ -88,7 +88,7 @@ export const MORE_RECIPES = [
   {
     id: 'bistek-tagalog', name: 'Bistek Tagalog', cuisine: 'Filipino', serves: '3', time: 30,
     timeNote: 'Time does not include marinating. Marinate for 30 minutes if you can.',
-    image: '', imageCredit: '',
+    image: 'images/bistek-tagalog.webp', imageCredit: '',
     blurb: 'Filipino beef steak in soy sauce and citrus, topped with onion rings.',
     notes: [],
     ingredients: [
@@ -112,7 +112,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'chicken-afritada', name: 'Chicken Afritada', cuisine: 'Filipino', serves: '4', time: 50,
-    image: '', imageCredit: '',
+    image: 'images/chicken-afritada.webp', imageCredit: '',
     blurb: 'Chicken, potato and carrot stewed in tomato sauce.',
     notes: [],
     ingredients: [

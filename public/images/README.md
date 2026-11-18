@@ -15,6 +15,11 @@ The file name must match the name below exactly, in lowercase.
 | Home-Style Gyudon Beef Bowl | gyudon.webp |
 | Tomato Egg Stir-Fry | tomato-egg.webp |
 | Potato Spanish Omelette | spanish-omelette.webp |
+| Pork Sinigang | pork-sinigang.webp |
+| Tinolang Manok | tinolang-manok.webp |
+| Arroz Caldo | arroz-caldo.webp |
+| Bistek Tagalog | bistek-tagalog.webp |
+| Chicken Afritada | chicken-afritada.webp |
 
 ## Photo rules
 
