@@ -12,7 +12,10 @@ function names(items, room) {
 
 export function missingLine(match) {
   const total = match.missing.length;
-  if (total === 0) return 'All ' + match.core.length + ' needed ingredients at home';
+  if (total === 0) {
+    const n = match.core.length;
+    return n === 1 ? '1 needed ingredient at home' : 'All ' + n + ' needed ingredients at home';
+  }
   const more = total > SHOW ? ' +' + (total - SHOW) + ' more' : '';
 
   if (match.status === 'almost') return 'Buy ' + total + ' more: ' + names(match.missing, SHOW) + more;

@@ -465,6 +465,20 @@ test('card line: Can Cook Now', () => {
   const m = matchRecipe(by('tomato-egg'), DEFAULT_FRIDGE); assert.equal(m.status, 'now');
   assert.equal(missingLine(m), 'All ' + m.core.length + ' needed ingredients at home');
 });
+test('card line: one needed ingredient is singular (regression)', () => {
+  const m = matchRecipe(by('tamagoyaki'), ['eggs']); assert.equal(m.status, 'now'); assert.equal(m.core.length, 1);
+  assert.equal(missingLine(m), '1 needed ingredient at home');
+  assert.equal(missingLine(fake('now', [], [], 1)), '1 needed ingredient at home');
+  assert.equal(missingLine(fake('now', [], [], 2)), 'All 2 needed ingredients at home');
+});
+test('card line never says "1 needed ingredients", for any recipe or fridge', () => {
+  const fridges = [[], DEFAULT_FRIDGE, INGREDIENTS.map((i) => i.key)].concat(INGREDIENTS.map((i) => [i.key]));
+  for (const f of fridges) for (const r of RECIPES) {
+    const line = missingLine(matchRecipe(r, f));
+    assert.ok(!/\b1 needed ingredients\b/.test(line), r.id + ': ' + line);
+    assert.ok(!/(^|\D)0 needed/.test(line), r.id + ': ' + line);
+  }
+});
 test('card line: Almost There says how many to buy', () => {
   assert.equal(lineFor('teriyaki-chicken'), 'Buy 1 more: soy sauce');
   assert.equal(missingLine(fake('almost', [], ['vinegar', 'carrots'])), 'Buy 2 more: vinegar, carrots');
