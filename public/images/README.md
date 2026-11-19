@@ -20,6 +20,11 @@ The file name must match the name below exactly, in lowercase.
 | Arroz Caldo | arroz-caldo.webp |
 | Bistek Tagalog | bistek-tagalog.webp |
 | Chicken Afritada | chicken-afritada.webp |
+| Pancit Canton | pancit-canton.webp |
+| Paksiw na Isda | paksiw-na-isda.webp |
+| Tamagoyaki | tamagoyaki.webp |
+| Home-Style Yakisoba | yakisoba.webp |
+| Home-Style Nikujaga | nikujaga.webp |
 
 ## Photo rules
 

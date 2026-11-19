@@ -55,7 +55,8 @@ test('every original recipe still has its photo file name', () => {
   for (const r of ORIGINAL_RECIPES) assert.equal(r.image, 'images/' + r.id + '.webp');
 });
 /* V1.5: photos are added batch by batch. Recipes without one keep the drawn plate. */
-const PHOTO_BATCHES_DONE = ['pork-sinigang', 'tinolang-manok', 'arroz-caldo', 'bistek-tagalog', 'chicken-afritada'];
+const PHOTO_BATCHES_DONE = ['pork-sinigang', 'tinolang-manok', 'arroz-caldo', 'bistek-tagalog', 'chicken-afritada',
+  'pancit-canton', 'paksiw-na-isda', 'tamagoyaki', 'yakisoba', 'nikujaga'];
 test('new recipes: photo set only for finished batches, others keep the drawn plate', () => {
   for (const r of MORE_RECIPES) assert.equal(r.image, PHOTO_BATCHES_DONE.includes(r.id) ? 'images/' + r.id + '.webp' : '', r.id);
 });

@@ -138,7 +138,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'pancit-canton', name: 'Pancit Canton', cuisine: 'Filipino', serves: '3 to 4', time: 30,
-    image: '', imageCredit: '',
+    image: 'images/pancit-canton.webp', imageCredit: '',
     blurb: 'Stir-fried noodles with cabbage and carrot. Add meat or shrimp if you have it.',
     notes: ['Noodle brands differ. Add a little more water if the noodles are still firm.'],
     ingredients: [
@@ -165,7 +165,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'paksiw-na-isda', name: 'Paksiw na Isda', cuisine: 'Filipino', serves: '2 to 3', time: 25,
-    image: '', imageCredit: '',
+    image: 'images/paksiw-na-isda.webp', imageCredit: '',
     blurb: 'Fish gently simmered in vinegar, ginger and garlic.',
     notes: [],
     ingredients: [
@@ -190,7 +190,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'tamagoyaki', name: 'Tamagoyaki', cuisine: 'Japanese', serves: '2', time: 15,
-    image: '', imageCredit: '',
+    image: 'images/tamagoyaki.webp', imageCredit: '',
     blurb: 'A soft, slightly sweet rolled omelette.',
     notes: ['A small rectangular pan makes rolling easier, but any small pan works.'],
     ingredients: [
@@ -212,7 +212,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'yakisoba', name: 'Home-Style Yakisoba', cuisine: 'Japanese', serves: '2', time: 20,
-    image: '', imageCredit: '',
+    image: 'images/yakisoba.webp', imageCredit: '',
     blurb: 'A simple home-style version. Stir-fried noodles with cabbage.',
     notes: [
       'This is a simple home version. Bottled yakisoba sauce gives the classic taste, but soy sauce works.',
@@ -241,7 +241,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'nikujaga', name: 'Home-Style Nikujaga', cuisine: 'Japanese', serves: '3 to 4', time: 40,
-    image: '', imageCredit: '',
+    image: 'images/nikujaga.webp', imageCredit: '',
     blurb: 'A simple home-style version. Sweet and savory beef and potato stew.',
     notes: ['This is a simple home version. Dashi and mirin give a more classic taste, but it works without them.'],
     ingredients: [
