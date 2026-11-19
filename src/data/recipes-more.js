@@ -266,7 +266,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'shogayaki', name: 'Shogayaki (Ginger Pork)', cuisine: 'Japanese', serves: '2', time: 20,
-    image: '', imageCredit: '',
+    image: 'images/shogayaki.webp', imageCredit: '',
     blurb: 'Thin pork slices in a quick ginger and soy sauce glaze.',
     notes: [],
     ingredients: [
@@ -290,7 +290,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'teriyaki-chicken', name: 'Teriyaki Chicken', cuisine: 'Japanese', serves: '2', time: 25,
-    image: '', imageCredit: '',
+    image: 'images/teriyaki-chicken.webp', imageCredit: '',
     blurb: 'Pan-fried chicken in a sweet, glossy soy glaze.',
     notes: [],
     ingredients: [
@@ -313,7 +313,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'butter-soy-mushrooms', name: 'Butter Soy Mushrooms', cuisine: 'Japanese', serves: '2', time: 10,
-    image: '', imageCredit: '',
+    image: 'images/butter-soy-mushrooms.webp', imageCredit: '',
     blurb: 'A quick Japanese side dish. Mushrooms browned in butter and soy sauce.',
     notes: ['This is a side dish. Good over rice or next to a main.'],
     ingredients: [
@@ -334,7 +334,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'shioyaki', name: 'Salt-Grilled Fish (Shioyaki)', cuisine: 'Japanese', serves: '2', time: 25,
-    image: '', imageCredit: '',
+    image: 'images/shioyaki.webp', imageCredit: '',
     blurb: 'Fish seasoned only with salt, cooked until the skin is crisp.',
     notes: ['Works in a pan or on a grill.'],
     ingredients: [
@@ -354,7 +354,7 @@ export const MORE_RECIPES = [
   },
   {
     id: 'garlic-butter-shrimp', name: 'Garlic Butter Shrimp', cuisine: 'International', serves: '2 to 3', time: 15,
-    image: '', imageCredit: '',
+    image: 'images/garlic-butter-shrimp.webp', imageCredit: '',
     blurb: 'Juicy shrimp in garlic butter. Ready in 15 minutes.',
     notes: [],
     ingredients: [

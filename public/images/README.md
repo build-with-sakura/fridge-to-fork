@@ -25,6 +25,11 @@ The file name must match the name below exactly, in lowercase.
 | Tamagoyaki | tamagoyaki.webp |
 | Home-Style Yakisoba | yakisoba.webp |
 | Home-Style Nikujaga | nikujaga.webp |
+| Shogayaki (Ginger Pork) | shogayaki.webp |
+| Teriyaki Chicken | teriyaki-chicken.webp |
+| Butter Soy Mushrooms | butter-soy-mushrooms.webp |
+| Salt-Grilled Fish (Shioyaki) | shioyaki.webp |
+| Garlic Butter Shrimp | garlic-butter-shrimp.webp |
 
 ## Photo rules
 
